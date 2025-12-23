@@ -1,0 +1,139 @@
+<!-- Path: frontend/templates/jobs.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs - Virtual CDC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .stats {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .filters {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .filters select, .filters input {
+            margin: 5px 10px 5px 0;
+            padding: 8px;
+        }
+        #jobsList {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .job-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .job-card:hover {
+            background: #f9f9f9;
+        }
+        .job-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+        .job-company {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .job-details {
+            font-size: 14px;
+            color: #888;
+            margin: 5px 0;
+        }
+        .job-description {
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .badge.ai {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jobs Listing</h1>
+
+    <div class="stats">
+        <strong>Total Jobs:</strong> <span id="totalJobs">0</span> |
+        <strong>AI Scraped:</strong> <span id="aiScraped">0</span> |
+        <strong>CDC Posted:</strong> <span id="cdcPosted">0</span>
+    </div>
+
+    <div class="filters">
+        <label>Job Type:</label>
+        <select id="jobTypeFilter">
+            <option value="">All</option>
+            <option value="full_time">Full Time</option>
+            <option value="part_time">Part Time</option>
+            <option value="internship">Internship</option>
+            <option value="contract">Contract</option>
+        </select>
+
+        <label>Source:</label>
+        <select id="sourceFilter">
+            <option value="">All</option>
+            <option value="ai_scraped">AI Scraped</option>
+            <option value="cdc_posted">CDC Posted</option>
+        </select>
+
+        <label>Location:</label>
+        <input type="text" id="locationFilter" placeholder="Enter location">
+
+        <button onclick="loadJobs()">Apply Filters</button>
+    </div>
+
+    <div id="jobsList">
+        <div class="loading">Loading jobs...</div>
+    </div>
+
+    <div class="pagination">
+        <button id="prevBtn" onclick="previousPage()" disabled>Previous</button>
+        <span>Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+        <button id="nextBtn" onclick="nextPage()">Next</button>
+    </div>
+
+    <script src="/static/js/jobs.js"></script>
+</body>
+</html>

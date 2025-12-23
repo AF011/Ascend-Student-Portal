@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Jobs - Virtual CDC{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Saved Jobs</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <span id="totalBookmarks">0</span> jobs bookmarked
+                    </p>
+                </div>
+                <a href="/student/jobs" class="hidden sm:flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Browse Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <!-- Filters Section - Mobile Optimized -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <!-- Search Input -->
+                <div class="flex-1 relative">
+                    <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search by title, company..." 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                </div>
+                
+                <!-- Job Type Filter -->
+                <div class="relative sm:w-48">
+                    <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <select 
+                        id="jobTypeFilter" 
+                        class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    >
+                        <option value="">All Job Types</option>
+                        <option value="full_time">Full Time</option>
+                        <option value="internship">Internship</option>
+                        <option value="part_time">Part Time</option>
+                        <option value="contract">Contract</option>
+                    </select>
+                    <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                
+                <!-- Filter Button -->
+                <button 
+                    onclick="filterBookmarks()" 
+                    class="sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <span>Filter</span>
+                </button>
+            </div>
+            
+            <!-- Active Filters Display -->
+            <div id="activeFilters" class="hidden mt-3 pt-3 border-t border-gray-100">
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs text-gray-500 font-medium">Active filters:</span>
+                    <div id="filterTags" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loading" class="hidden">
+            <div class="flex flex-col items-center justify-center py-16">
+                <div class="w-12 h-12 border-3 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <p class="mt-4 text-sm text-gray-500">Loading saved jobs...</p>
+            </div>
+        </div>
+        
+        <!-- Bookmarks Grid -->
+        <div id="bookmarksList" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+        
+        <!-- Empty State -->
+        <div id="noBookmarks" class="hidden">
+            <div class="bg-white rounded-xl p-12 text-center border border-gray-200">
+                <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No saved jobs yet</h3>
+                <p class="text-sm text-gray-500 mb-6">Bookmark jobs you're interested in to save them here for later!</p>
+                <a href="/student/jobs" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    Browse Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allBookmarks = [];
+
+// Auto-filter on input change
+document.addEventListener('DOMContentLoaded', () => {
+    loadBookmarks();
+    
+    const searchInput = document.getElementById('searchInput');
+    const jobTypeFilter = document.getElementById('jobTypeFilter');
+    
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(filterBookmarks, 300);
+    });
+    
+    jobTypeFilter.addEventListener('change', filterBookmarks);
+});
+
+async function loadBookmarks() {
+    document.getElementById('loading').classList.remove('hidden');
+    document.getElementById('bookmarksList').innerHTML = '';
+    document.getElementById('noBookmarks').classList.add('hidden');
+    
+    try {
+        const token = getToken();
+        const response = await fetch('/api/v1/student/jobs/bookmarks', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        let bookmarks = [];
+        
+        if (data && data.success && data.bookmarks && Array.isArray(data.bookmarks)) {
+            bookmarks = data.bookmarks;
+        } else if (data && Array.isArray(data.bookmarks)) {
+            bookmarks = data.bookmarks;
+        } else if (data && data.jobs && Array.isArray(data.jobs)) {
+            bookmarks = data.jobs.map(job => ({
+                job: job,
+                bookmarked_at: job.bookmarked_at || new Date()
+            }));
+        } else if (Array.isArray(data)) {
+            bookmarks = data.map(item => {
+                if (item.job) return item;
+                return { job: item, bookmarked_at: item.bookmarked_at || new Date() };
+            });
+        }
+        
+        if (bookmarks.length > 0) {
+            allBookmarks = bookmarks;
+            document.getElementById('totalBookmarks').textContent = allBookmarks.length;
+            displayBookmarks(allBookmarks);
+        } else {
+            document.getElementById('noBookmarks').classList.remove('hidden');
+            document.getElementById('totalBookmarks').textContent = 0;
+        }
+    } catch (error) {
+        console.error('Error loading bookmarks:', error);
+        showNotification('Error loading saved jobs', 'error');
+        document.getElementById('noBookmarks').classList.remove('hidden');
+        document.getElementById('totalBookmarks').textContent = 0;
+    } finally {
+        document.getElementById('loading').classList.add('hidden');
+    }
+}
+
+function filterBookmarks() {
+    const jobType = document.getElementById('jobTypeFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    let filtered = allBookmarks;
+    let activeFilters = [];
+    
+    if (jobType) {
+        filtered = filtered.filter(b => b.job.job_type === jobType);
+        activeFilters.push({ type: 'jobType', label: jobType.replace('_', ' ').toUpperCase(), value: jobType });
+    }
+    
+    if (search) {
+        filtered = filtered.filter(b => 
+            b.job.title.toLowerCase().includes(search) ||
+            b.job.company.toLowerCase().includes(search) ||
+            b.job.description.toLowerCase().includes(search) ||
+            (b.job.location && b.job.location.toLowerCase().includes(search))
+        );
+        activeFilters.push({ type: 'search', label: `"${search}"`, value: search });
+    }
+    
+    displayActiveFilters(activeFilters);
+    displayBookmarks(filtered);
+}
+
+function displayActiveFilters(filters) {
+    const container = document.getElementById('activeFilters');
+    const tagsContainer = document.getElementById('filterTags');
+    
+    if (filters.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    tagsContainer.innerHTML = filters.map(filter => `
+        <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+            ${filter.label}
+            <button onclick="clearFilter('${filter.type}')" class="hover:text-blue-900">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </span>
+    `).join('');
+}
+
+function clearFilter(type) {
+    if (type === 'jobType') {
+        document.getElementById('jobTypeFilter').value = '';
+    } else if (type === 'search') {
+        document.getElementById('searchInput').value = '';
+    }
+    filterBookmarks();
+}
+
+function displayBookmarks(bookmarks) {
+    const container = document.getElementById('bookmarksList');
+    container.innerHTML = '';
+    
+    if (bookmarks.length === 0) {
+        const hasActiveFilters = document.getElementById('jobTypeFilter').value || 
+                                 document.getElementById('searchInput').value.trim();
+        
+        if (hasActiveFilters) {
+            container.innerHTML = `
+                <div class="col-span-full bg-white rounded-xl p-12 text-center border border-gray-200">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No matching jobs found</h3>
+                    <p class="text-sm text-gray-500 mb-4">Try adjusting your filters or search terms</p>
+                    <button onclick="clearAllFilters()" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                        Clear all filters
+                    </button>
+                </div>
+            `;
+        } else {
+            document.getElementById('noBookmarks').classList.remove('hidden');
+        }
+        return;
+    }
+    
+    document.getElementById('noBookmarks').classList.add('hidden');
+    
+    bookmarks.forEach(bookmark => {
+        const job = bookmark.job;
+        if (!job) return;
+        
+        const hasExternalUrl = job.job_url && job.job_url.trim();
+        const daysSaved = Math.floor((new Date() - new Date(bookmark.bookmarked_at)) / (1000 * 60 * 60 * 24));
+        const savedText = daysSaved === 0 ? 'Today' : daysSaved === 1 ? 'Yesterday' : `${daysSaved}d ago`;
+        
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all';
+        
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex-1 pr-3">
+                    <h3 class="font-semibold text-gray-900 leading-tight mb-2 line-clamp-2">${job.title}</h3>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <span class="truncate">${job.company}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-500">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="truncate">${job.location}</span>
+                        </div>
+                    </div>
+                </div>
+                <button 
+                    onclick="removeBookmark('${job._id}')" 
+                    class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+                    title="Remove bookmark"
+                >
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">${job.description}</p>
+            
+            <div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+                <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">
+                    ${job.job_type.replace('_', ' ').toUpperCase()}
+                </span>
+                ${job.salary_range ? `
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        ${job.salary_range}
+                    </span>
+                ` : ''}
+                <span class="text-xs text-gray-500 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Saved ${savedText}
+                </span>
+            </div>
+            
+            <div class="space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <button 
+                        onclick="viewJob('${job._id}')" 
+                        class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span>View</span>
+                    </button>
+                    ${hasExternalUrl ? `
+                        <button 
+                            onclick="window.open('${job.job_url}', '_blank')" 
+                            class="flex items-center justify-center gap-2 border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            <span>Apply</span>
+                        </button>
+                    ` : `
+                        <button 
+                            onclick="quickApply('${job._id}')" 
+                            class="flex items-center justify-center gap-2 border border-green-600 text-green-600 hover:bg-green-50 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                            <span>Apply</span>
+                        </button>
+                    `}
+                </div>
+                
+                ${job.application_deadline ? `
+                    <button 
+                        onclick='addToGoogleCalendar(${JSON.stringify({
+                            title: job.title,
+                            company: job.company,
+                            deadline: job.application_deadline,
+                            url: job.job_url || window.location.origin + "/student/jobs/" + job._id
+                        })})' 
+                        class="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Add Deadline to Calendar</span>
+                    </button>
+                ` : ''}
+            </div>
+        `;
+        
+        container.appendChild(card);
+    });
+}
+
+function clearAllFilters() {
+    document.getElementById('jobTypeFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    filterBookmarks();
+}
+
+function viewJob(jobId) {
+    window.location.href = `/student/jobs/${jobId}`;
+}
+
+async function removeBookmark(jobId) {
+    if (!confirm('Remove this job from saved jobs?')) return;
+    
+    try {
+        const token = getToken();
+        const response = await fetch(`/api/v1/student/jobs/${jobId}/bookmark`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Removed from saved jobs', 'success');
+            loadBookmarks();
+        } else {
+            showNotification('Failed to remove bookmark', 'error');
+        }
+    } catch (error) {
+        showNotification('Error removing bookmark', 'error');
+    }
+}
+
+async function quickApply(jobId) {
+    if (!confirm('Submit your application to this job?')) return;
+    
+    try {
+        const token = getToken();
+        const response = await fetch(`/api/v1/student/jobs/${jobId}/apply`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Application submitted successfully!', 'success');
+            setTimeout(() => window.location.href = '/student/my-applications', 1500);
+        } else {
+            showNotification(data.detail || 'Failed to submit application', 'error');
+        }
+    } catch (error) {
+        showNotification('Error submitting application', 'error');
+    }
+}
+
+function addToGoogleCalendar(jobInfo) {
+    const deadline = new Date(jobInfo.deadline);
+    const reminderDate = new Date(deadline);
+    reminderDate.setDate(reminderDate.getDate() - 1);
+    
+    const formatDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const eventTitle = `Apply: ${jobInfo.title} at ${jobInfo.company}`;
+    const eventDescription = `Application deadline for ${jobInfo.title} position at ${jobInfo.company}.
+
+Apply here: ${jobInfo.url}
+
+Don't forget to submit your application before the deadline!`;
+    
+    const startDate = new Date(deadline);
+    startDate.setHours(9, 0, 0, 0);
+    const endDate = new Date(deadline);
+    endDate.setHours(17, 0, 0, 0);
+    
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+    googleCalendarUrl.searchParams.append('action', 'TEMPLATE');
+    googleCalendarUrl.searchParams.append('text', eventTitle);
+    googleCalendarUrl.searchParams.append('details', eventDescription);
+    googleCalendarUrl.searchParams.append('location', jobInfo.company);
+    googleCalendarUrl.searchParams.append('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    googleCalendarUrl.searchParams.append('remind', '1440');
+    
+    window.open(googleCalendarUrl.toString(), '_blank');
+    showNotification('Opening Google Calendar...', 'success');
+}
+
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+function showNotification(message, type = 'info') {
+    const toast = document.createElement('div');
+    const bgColor = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+    toast.className = `fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 ${bgColor} text-white px-4 py-3 rounded-xl text-sm font-medium shadow-lg transform transition-transform duration-300`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+
+<style>
+.border-3 {
+    border-width: 3px;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 640px) {
+    button, a, select, input {
+        min-height: 44px;
+    }
+}
+
+/* Hide scrollbar but keep functionality */
+select {
+    scrollbar-width: thin;
+}
+
+/* Smooth transitions */
+* {
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button, a, input, select {
+    transition-property: all;
+}
+</style>
+{% endblock %}

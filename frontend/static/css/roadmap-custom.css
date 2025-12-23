@@ -1,0 +1,131 @@
+/* roadmap-custom.css - Custom styles for roadmap page */
+/* Place in: frontend/static/css/roadmap-custom.css */
+
+/* Slide-in animation for notifications */
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+}
+
+/* Smooth transitions */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar for modal */
+#weekModal .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+}
+
+#weekModal .overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#weekModal .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+#weekModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Backdrop blur effect */
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+/* Gradient text effect */
+.gradient-text {
+    background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Phase card hover effect */
+.phase-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.phase-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Week button pulse effect for active weeks */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.week-active {
+    animation: pulse 2s infinite;
+}
+
+/* Loading spinner custom colors */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Completed badge animation */
+@keyframes bounce-in {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.badge-completed {
+    animation: bounce-in 0.5s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    #weekModal .bg-white {
+        margin: 1rem;
+    }
+}

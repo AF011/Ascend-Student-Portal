@@ -1,0 +1,659 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Virtual CDC{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Professional Color System */
+    :root {
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --success-500: #22c55e;
+        --success-600: #16a34a;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --info-500: #06b6d4;
+        --info-600: #0891b2;
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-900: #0f172a;
+    }
+    
+    /* Subtle entrance animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.4s ease-out;
+    }
+    
+    .stagger-item {
+        opacity: 0;
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .stagger-item:nth-child(1) { animation-delay: 0.05s; }
+    .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+    .stagger-item:nth-child(3) { animation-delay: 0.15s; }
+    .stagger-item:nth-child(4) { animation-delay: 0.2s; }
+    .stagger-item:nth-child(5) { animation-delay: 0.25s; }
+    .stagger-item:nth-child(6) { animation-delay: 0.3s; }
+    
+    /* Professional Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.4;
+    }
+    
+    /* Stats Cards */
+    .stat-card {
+        background: white;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 0;
+        background: var(--card-accent);
+        transition: height 0.3s ease;
+    }
+    
+    .stat-card:hover::after {
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        transition: transform 0.2s ease;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.05);
+    }
+    
+    /* Action Cards */
+    .action-card {
+        background: white;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: visible;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 1rem;
+        padding: 2px;
+        background: linear-gradient(135deg, var(--card-accent), transparent);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+    
+    .action-card:hover::before {
+        opacity: 1;
+    }
+    
+    .action-icon {
+        transition: all 0.25s ease;
+    }
+    
+    .action-card:hover .action-icon {
+        transform: translateY(-2px);
+    }
+    
+    .action-arrow {
+        transition: transform 0.25s ease;
+    }
+    
+    .action-card:hover .action-arrow {
+        transform: translateX(4px);
+    }
+    
+    /* Activity Cards */
+    .activity-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+    
+    .activity-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+    }
+    
+    .activity-item {
+        transition: all 0.2s ease;
+    }
+    
+    .activity-item:hover {
+        background: var(--slate-50);
+        transform: translateX(2px);
+    }
+    
+    /* Counter animation */
+    .counter {
+        font-variant-numeric: tabular-nums;
+    }
+    
+    /* Time badge */
+    .time-badge {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Metric trend */
+    .metric-trend {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-shortlisted {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-selected {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stat-card, .action-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="dashboard-header rounded-xl p-8 mb-8 text-white shadow-lg fade-in relative">
+        <div class="relative z-10">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        <span id="greeting">Good Morning</span>, <span id="userName">there</span>!
+                    </h1>
+                    <p class="text-blue-100 text-sm">Access your tools from here and continue your career journey</p>
+                </div>
+                <div class="flex flex-wrap gap-3 text-sm">
+                    <div class="time-badge px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i class="far fa-calendar"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                    <div class="time-badge px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Overview - 3 cards instead of 4 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="stat-card stagger-item rounded-xl p-6 shadow-sm" style="--card-accent: #2563eb;">
+            <div class="flex items-start justify-between mb-4">
+                <div class="stat-icon w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Applications</span>
+            </div>
+            <div class="mb-3">
+                <div class="counter text-3xl font-bold text-slate-900 mb-1" id="totalApplications">0</div>
+                <p class="text-sm text-slate-500">Total submitted</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="metric-trend text-amber-600 flex items-center gap-1">
+                    <i class="fas fa-clock text-xs"></i>
+                    <span id="pendingText">0 pending</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card stagger-item rounded-xl p-6 shadow-sm" style="--card-accent: #22c55e;">
+            <div class="flex items-start justify-between mb-4">
+                <div class="stat-icon w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-bookmark text-green-600 text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saved Jobs</span>
+            </div>
+            <div class="mb-3">
+                <div class="counter text-3xl font-bold text-slate-900 mb-1" id="savedJobs">0</div>
+                <p class="text-sm text-slate-500">Ready to apply</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="metric-trend text-green-600 flex items-center gap-1">
+                    <i class="fas fa-bookmark text-xs"></i>
+                    <span>Bookmarked</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card stagger-item rounded-xl p-6 shadow-sm" style="--card-accent: #6366f1;">
+            <div class="flex items-start justify-between mb-4">
+                <div class="stat-icon w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-indigo-600 text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Success Rate</span>
+            </div>
+            <div class="mb-3">
+                <div class="counter text-3xl font-bold text-slate-900 mb-1" id="successRate">0%</div>
+                <p class="text-sm text-slate-500">Selection ratio</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="metric-trend text-indigo-600 flex items-center gap-1">
+                    <i class="fas fa-check-circle text-xs"></i>
+                    <span id="successText">0 selected</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Header -->
+    <div class="mb-6 stagger-item">
+        <h2 class="text-xl font-bold text-slate-900 mb-1">Quick Actions</h2>
+        <p class="text-sm text-slate-600">Common tasks and shortcuts</p>
+    </div>
+    
+    <!-- Quick Actions - 2 cards instead of 4 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="/student/jobs" class="action-card stagger-item rounded-xl p-6 shadow-sm group" style="--card-accent: #2563eb;">
+            <div class="action-icon w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 shadow-md">
+                <i class="fas fa-briefcase text-white text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                Browse Jobs
+            </h3>
+            <p class="text-sm text-slate-600 mb-4">
+                Explore new opportunities and positions
+            </p>
+            <div class="flex items-center text-blue-600 text-sm font-medium">
+                <span>View jobs</span>
+                <i class="fas fa-arrow-right ml-2 action-arrow"></i>
+            </div>
+        </a>
+        
+        <a href="/student/profile" class="action-card stagger-item rounded-xl p-6 shadow-sm group" style="--card-accent: #f59e0b;">
+            <div class="action-icon w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mb-4 shadow-md">
+                <i class="fas fa-user text-white text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors">
+                My Profile
+            </h3>
+            <p class="text-sm text-slate-600 mb-4">
+                Update your information and resume
+            </p>
+            <div class="flex items-center text-amber-600 text-sm font-medium">
+                <span>Edit profile</span>
+                <i class="fas fa-arrow-right ml-2 action-arrow"></i>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Activity Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Applications -->
+        <div class="activity-card stagger-item rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-history text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900">Recent Applications</h3>
+                </div>
+                <a href="/student/my-applications" class="text-sm text-blue-600 hover:underline font-medium">View all →</a>
+            </div>
+            <div id="recentApplications">
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p class="text-sm font-medium">No recent applications</p>
+                    <p class="text-xs mt-1">Start applying to jobs to see them here</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommended Jobs -->
+        <div class="activity-card stagger-item rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-lightbulb text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900">Recommended for You</h3>
+                </div>
+                <a href="/student/jobs" class="text-sm text-green-600 hover:underline font-medium">View all →</a>
+            </div>
+            <div id="recommendedJobs">
+                <div class="empty-state">
+                    <i class="fas fa-sparkles"></i>
+                    <p class="text-sm font-medium">Loading recommendations...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', path='/js/utils.js') }}"></script>
+
+<script>
+// Set greeting based on time
+function setGreeting() {
+    const hour = new Date().getHours();
+    let greeting = 'Good Evening';
+    if (hour >= 0 && hour < 5) greeting = 'Hey Midnight Owl';
+    else if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+    else if (hour >= 12 && hour < 18) greeting = 'Good Afternoon';
+    
+    document.getElementById('greeting').textContent = greeting;
+}
+
+// Update current date and time
+function updateDateTime() {
+    const now = new Date();
+    const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+}
+
+updateDateTime();
+setInterval(updateDateTime, 60000);
+
+// Load dashboard data
+async function loadDashboard() {
+    await Promise.all([
+        loadStats(),
+        loadRecentApplications(),
+        loadRecommendedJobs()
+    ]);
+}
+
+async function loadStats() {
+    try {
+        const token = getToken();
+        
+        // Load application stats
+        const statsResponse = await fetch('/api/v1/student/jobs/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const statsData = await statsResponse.json();
+        
+        if (statsData.success) {
+            const stats = statsData.stats;
+            animateValue('totalApplications', 0, stats.total_applications || 0, 800);
+            document.getElementById('pendingText').textContent = `${stats.pending || 0} pending`;
+            
+            // Calculate success rate
+            const total = stats.total_applications || 0;
+            const selected = stats.selected || 0;
+            const successRate = total > 0 ? Math.round((selected / total) * 100) : 0;
+            animateValue('successRate', 0, successRate, 1000, '%');
+            document.getElementById('successText').textContent = `${selected} selected`;
+        }
+        
+        // Load bookmarks count
+        const bookmarksResponse = await fetch('/api/v1/student/jobs/bookmarks', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookmarksData = await bookmarksResponse.json();
+        
+        let bookmarkCount = 0;
+        if (bookmarksData && bookmarksData.success && bookmarksData.bookmarks && Array.isArray(bookmarksData.bookmarks)) {
+            bookmarkCount = bookmarksData.bookmarks.length;
+        } else if (bookmarksData && Array.isArray(bookmarksData.bookmarks)) {
+            bookmarkCount = bookmarksData.bookmarks.length;
+        } else if (Array.isArray(bookmarksData)) {
+            bookmarkCount = bookmarksData.length;
+        } else if (bookmarksData && bookmarksData.jobs && Array.isArray(bookmarksData.jobs)) {
+            bookmarkCount = bookmarksData.jobs.length;
+        }
+        
+        animateValue('savedJobs', 0, bookmarkCount, 1000);
+        
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+async function loadRecentApplications() {
+    try {
+        const token = getToken();
+        const response = await fetch('/api/v1/student/jobs/my-applications?limit=3', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.applications && data.applications.length > 0) {
+            displayRecentApplications(data.applications);
+        }
+    } catch (error) {
+        console.error('Error loading applications:', error);
+    }
+}
+
+function displayRecentApplications(applications) {
+    const container = document.getElementById('recentApplications');
+    container.innerHTML = '';
+    
+    const statusClasses = {
+        pending: 'status-pending',
+        shortlisted: 'status-shortlisted',
+        selected: 'status-selected',
+        rejected: 'status-rejected'
+    };
+    
+    applications.forEach(app => {
+        const job = app.job;
+        if (!job) return;
+        
+        const div = document.createElement('div');
+        div.className = 'activity-item p-4 border border-slate-200 rounded-lg cursor-pointer';
+        div.onclick = () => window.location.href = `/student/jobs/${job._id}`;
+        
+        div.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-slate-900 text-sm">${job.title}</h4>
+                <span class="status-badge ${statusClasses[app.status]}">${app.status}</span>
+            </div>
+            <p class="text-sm text-slate-600 mb-2">${job.company}</p>
+            <div class="flex items-center text-xs text-slate-500">
+                <i class="far fa-calendar mr-1"></i>
+                Applied ${new Date(app.applied_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+async function loadRecommendedJobs() {
+    try {
+        const token = getToken();
+        const response = await fetch('/api/v1/student/jobs/recommended?limit=3', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.jobs && data.jobs.length > 0) {
+            displayRecommendedJobs(data.jobs);
+        } else {
+            document.getElementById('recommendedJobs').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <p class="text-sm font-medium">No recommendations yet</p>
+                    <p class="text-xs mt-1">Complete your profile to get personalized job suggestions</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading recommended jobs:', error);
+    }
+}
+
+function displayRecommendedJobs(jobs) {
+    const container = document.getElementById('recommendedJobs');
+    container.innerHTML = '';
+    
+    jobs.forEach(job => {
+        const div = document.createElement('div');
+        div.className = 'activity-item p-4 border border-slate-200 rounded-lg cursor-pointer';
+        div.onclick = () => window.location.href = `/student/jobs/${job._id}`;
+        
+        div.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-semibold text-slate-900 text-sm">${job.title}</h4>
+                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-medium">${job.job_type.replace('_', ' ')}</span>
+            </div>
+            <p class="text-sm text-slate-600 mb-2">${job.company} • ${job.location}</p>
+            <div class="flex items-center text-xs text-slate-500">
+                <i class="far fa-clock mr-1"></i>
+                Posted ${new Date(job.posted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+// Smooth number animation
+function animateValue(id, start, end, duration, suffix = '') {
+    const element = document.getElementById(id);
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current) + suffix;
+    }, 16);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!isLoggedIn()) {
+        window.location.href = '/auth/login';
+        return;
+    }
+    
+    // Load user name from API
+    try {
+        const token = getToken();
+        const response = await fetch('/api/v1/students/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        if (data && data.profile_data && data.profile_data.full_name) {
+            document.getElementById('userName').textContent = data.profile_data.full_name;
+        } else if (data && data.full_name) {
+            document.getElementById('userName').textContent = data.full_name;
+        } else if (data && data.email) {
+            // Use email as fallback
+            document.getElementById('userName').textContent = data.email.split('@')[0];
+        }
+    } catch (error) {
+        console.error('Error loading user:', error);
+        // Fallback to token data
+        const user = getUser();
+        if (user) {
+            const userName = user.profile_data?.full_name || user.full_name || user.email?.split('@')[0] || 'there';
+            document.getElementById('userName').textContent = userName;
+        }
+    }
+    
+    setGreeting();
+    loadDashboard();
+});
+</script>
+{% endblock %}

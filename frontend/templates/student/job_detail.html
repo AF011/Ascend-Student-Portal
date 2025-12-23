@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block title %}Job Details - Virtual CDC{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Job Details (Left - 2 columns) -->
+    <div class="lg:col-span-2">
+        <div id="jobDetail" class="bg-white p-6 shadow"></div>
+    </div>
+    
+    <!-- AI Chat Assistant (Right - 1 column) -->
+    <div class="lg:col-span-1">
+        <div class="bg-white shadow sticky top-20">
+            <div class="p-4 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                <h3 class="font-bold flex items-center gap-2">
+                    <i class="fas fa-robot"></i> Ask AI About This Job
+                </h3>
+                <p class="text-xs text-blue-100 mt-1">Get instant answers about this role</p>
+            </div>
+            
+            <div id="chatMessages" class="h-96 overflow-y-auto p-4 bg-slate-50">
+                <div class="text-center text-sm text-slate-500 py-8">
+                    <i class="fas fa-comment-dots text-3xl mb-2 text-slate-300"></i>
+                    <p>Ask me anything about this job!</p>
+                    <p class="text-xs mt-1">Examples: "What skills do I need?", "Tell me about the company"</p>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t bg-white">
+                <div class="mb-3 flex flex-wrap gap-2">
+                    <button onclick="askPreset('What skills are required for this role?')" 
+                            class="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors border border-blue-200">
+                        💡 Skills needed?
+                    </button>
+                    <button onclick="askPreset('Tell me about the company culture')" 
+                            class="text-xs bg-purple-50 text-purple-600 px-3 py-1.5 rounded-full hover:bg-purple-100 transition-colors border border-purple-200">
+                        🏢 About company
+                    </button>
+                    <button onclick="askPreset('How should I prepare for this role?')" 
+                            class="text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors border border-green-200">
+                        📚 How to prepare?
+                    </button>
+                </div>
+                <div class="flex gap-2 items-end bg-slate-50 rounded-xl p-2 border-2 border-slate-200 focus-within:border-blue-500 transition-colors">
+                    <input type="text" id="chatInput" placeholder="Ask anything about this job..." 
+                           class="flex-1 px-3 py-2.5 bg-transparent text-sm focus:outline-none placeholder-slate-400"
+                           onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" id="sendBtn" 
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-2 text-center">
+                    <i class="fas fa-sparkles mr-1"></i> Powered by AI
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.thread-container {
+    position: relative;
+    padding-left: 32px;
+    min-height: 50px;
+}
+
+.thread-line {
+    position: absolute;
+    left: 16px;
+    top: 40px;
+    bottom: -4px;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+.thread-message:last-child .thread-line {
+    display: none;
+}
+
+.message-avatar {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    z-index: 10;
+}
+
+/* Custom Scrollbar */
+#chatMessages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* For Firefox */
+#chatMessages {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+</style>
+
+<script>
+// ========== MARKDOWN RENDERING ==========
+function renderMarkdown(markdown, elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    let html = markdown
+        // Bold
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        // Italic
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Headers
+        .replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-5 mb-3">$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-6 mb-4">$1</h1>')
+        // Lists
+        .replace(/^\* (.+)$/gm, '<li class="ml-4">$1</li>')
+        // Links
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p class="mb-2">')
+        .replace(/\n/g, '<br>');
+    
+    // Wrap list items in ul
+    html = html.replace(/(<li class="ml-4">.+?<\/li>(\n|<br>)*)+/g, (match) => {
+        return '<ul class="list-disc list-inside space-y-1 mb-3">' + match.replace(/<br>/g, '') + '</ul>';
+    });
+    
+    // Wrap in paragraphs if not already wrapped
+    if (!html.startsWith('<')) {
+        html = '<p class="mb-2">' + html + '</p>';
+    }
+    
+    element.innerHTML = html;
+}
+
+function renderMarkdownInline(markdown, element) {
+    if (!element) return;
+    
+    let html = markdown
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^\* (.+)$/gm, '<li class="ml-4">$1</li>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>')
+        .replace(/\n\n/g, '</p><p class="mt-2">')
+        .replace(/\n/g, '<br>');
+    
+    html = html.replace(/(<li class="ml-4">.+?<\/li>(\n|<br>)*)+/g, (match) => {
+        return '<ul class="list-disc list-inside space-y-1 my-2">' + match.replace(/<br>/g, '') + '</ul>';
+    });
+    
+    element.innerHTML = html;
+}
+
+const jobId = window.location.pathname.split('/').pop();
+let currentJob = null;
+let isProcessing = false;
+
+async function loadJobDetail() {
+    try {
+        const token = getToken();
+        
+        const response = await fetch(`/api/v1/jobs/${jobId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        if (!data.success) {
+            showNotification('Job not found', 'error');
+            return;
+        }
+        
+        currentJob = data.job;
+        
+        const statusResponse = await fetch(`/api/v1/student/jobs/${jobId}/check-status`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const statusData = await statusResponse.json();
+        
+        displayJob(currentJob, statusData);
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error loading job', 'error');
+    }
+}
+
+function displayJob(job, status) {
+    const container = document.getElementById('jobDetail');
+    
+    const isExternalJob = job.source === 'ai_scraped' || job.institution_id === 'system';
+    const hasExternalUrl = job.job_url && job.job_url.trim();
+    
+    let requirements = job.requirements || '';
+    if (typeof requirements === 'string') {
+        requirements = requirements.split('\n').filter(r => r.trim());
+    }
+    
+    let skills = job.skills_required || '';
+    if (typeof skills === 'string') {
+        skills = skills.split(',').filter(s => s.trim());
+    }
+    
+    let actionButtons = '';
+    if (hasExternalUrl) {
+        actionButtons = `
+            <button onclick="window.open('${job.job_url}', '_blank')" class="bg-blue-600 text-white px-6 py-3 hover:bg-blue-700 flex items-center gap-2">
+                <i class="fas fa-external-link-alt"></i> Apply on ${job.source_platform || 'Website'}
+            </button>
+            <button onclick="bookmarkJob()" class="border-2 border-blue-600 text-blue-600 px-6 py-3 hover:bg-blue-50 flex items-center gap-2">
+                <i class="fas fa-bookmark"></i> Save Job
+            </button>
+        `;
+    } else {
+        const applyButton = status.has_applied 
+            ? `<button class="bg-gray-400 text-white px-6 py-3 cursor-not-allowed" disabled>Already Applied</button>`
+            : `<button onclick="applyToJob()" class="bg-blue-600 text-white px-6 py-3 hover:bg-blue-700">Apply Now</button>`;
+        
+        const bookmarkButton = status.is_bookmarked
+            ? `<button onclick="removeBookmark()" class="border border-red-500 text-red-500 px-4 py-3">Remove Bookmark</button>`
+            : `<button onclick="bookmarkJob()" class="border border-blue-600 text-blue-600 px-4 py-3">Bookmark</button>`;
+        
+        actionButtons = `${applyButton} ${bookmarkButton}`;
+    }
+    
+    container.innerHTML = `
+        <button onclick="window.history.back()" class="text-blue-600 mb-4 flex items-center gap-1 hover:underline">
+            <i class="fas fa-arrow-left"></i> Back to Jobs
+        </button>
+        
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">${job.title}</h1>
+                <p class="text-xl text-gray-600 flex items-center gap-2">
+                    <i class="fas fa-building"></i> ${job.company}
+                </p>
+            </div>
+            <span class="bg-blue-100 text-blue-600 px-3 py-1 text-sm font-semibold">${job.job_type.replace('_', ' ').toUpperCase()}</span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm bg-slate-50 p-4">
+            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-blue-600"></i> <strong>Location:</strong> ${job.location}</div>
+            <div class="flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-600"></i> <strong>Salary:</strong> ${job.salary_range || 'Not specified'}</div>
+            <div class="flex items-center gap-2"><i class="fas fa-briefcase text-purple-600"></i> <strong>Experience:</strong> ${job.experience_required || 'Fresher'}</div>
+            ${job.positions_available ? `<div class="flex items-center gap-2"><i class="fas fa-users text-orange-600"></i> <strong>Positions:</strong> ${job.positions_available}</div>` : ''}
+            ${job.application_deadline ? `<div class="flex items-center gap-2"><i class="fas fa-calendar text-red-600"></i> <strong>Deadline:</strong> ${new Date(job.application_deadline).toLocaleDateString()}</div>` : ''}
+            <div class="flex items-center gap-2"><i class="fas fa-clock text-slate-600"></i> <strong>Posted:</strong> ${new Date(job.posted_at).toLocaleDateString()}</div>
+        </div>
+        
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3 flex items-center gap-2"><i class="fas fa-file-alt text-blue-600"></i> Description</h2>
+            <div class="text-gray-700 leading-relaxed prose prose-sm max-w-none" id="jobDescription"></div>
+        </div>
+        
+        ${requirements.length > 0 ? `
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3 flex items-center gap-2"><i class="fas fa-check-circle text-green-600"></i> Requirements</h2>
+            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                ${requirements.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+        </div>
+        ` : ''}
+        
+        ${skills.length > 0 ? `
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3 flex items-center gap-2"><i class="fas fa-code text-purple-600"></i> Skills Required</h2>
+            <div class="flex flex-wrap gap-2">
+                ${skills.map(s => `<span class="bg-blue-100 text-blue-600 px-3 py-1.5 text-sm font-medium">${s}</span>`).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="flex gap-4 pt-4 border-t">
+            ${actionButtons}
+        </div>
+        
+        ${job.application_deadline ? `
+        <div class="mt-4 pt-4 border-t">
+            <button onclick='addToGoogleCalendar(${JSON.stringify({
+                title: job.title,
+                company: job.company,
+                deadline: job.application_deadline,
+                url: job.job_url || window.location.href
+            })})' class="w-full md:w-auto text-sm border-2 border-purple-600 text-purple-600 px-6 py-3 hover:bg-purple-50 flex items-center justify-center gap-2 font-semibold">
+                <i class="fab fa-google text-lg"></i> 
+                <span>Add Deadline to Google Calendar</span>
+            </button>
+            <p class="text-xs text-gray-500 mt-2">
+                <i class="fas fa-bell mr-1"></i> Set a reminder for: ${new Date(job.application_deadline).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}
+            </p>
+        </div>
+        ` : ''}
+    `;
+    
+    // Render markdown for job description
+    renderMarkdown(job.description, 'jobDescription');
+}
+
+// ========== AI CHAT FUNCTIONS ==========
+function getUserInfo() {
+    const token = getToken();
+    if (!token) return { username: 'User', initial: 'U' };
+    
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // Try to extract name from the token, fallback to email or 'User'
+        let username = payload.name || payload.full_name || payload.sub || payload.email || 'User';
+        
+        // If username is an email, extract the name part before @
+        if (username.includes('@')) {
+            username = username.split('@')[0];
+        }
+        
+        // Capitalize first letter
+        username = username.charAt(0).toUpperCase() + username.slice(1);
+        
+        const initial = username.charAt(0).toUpperCase();
+        return { username, initial };
+    } catch {
+        return { username: 'User', initial: 'U' };
+    }
+}
+
+function addMessage(text, isUser = false, isStreaming = false) {
+    const messagesDiv = document.getElementById('chatMessages');
+    
+    if (messagesDiv.querySelector('.text-center')) {
+        messagesDiv.innerHTML = '';
+    }
+    
+    const userInfo = getUserInfo();
+    const username = isUser ? userInfo.username : 'LeoAI';
+    const initial = isUser ? userInfo.initial : 'L';
+    const avatarColor = isUser ? 'bg-blue-600' : 'bg-gradient-to-br from-purple-500 to-indigo-600';
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'thread-message thread-container mb-4';
+    
+    if (isStreaming) {
+        messageDiv.classList.add('streaming-message');
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="thread-line"></div>
+        <div class="message-avatar ${avatarColor} w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-white shadow-md">
+            ${initial}
+        </div>
+        <div class="pl-2">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-sm text-gray-900">${username}</span>
+                <span class="text-xs text-gray-400">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <div class="text-sm text-gray-700 leading-relaxed message-content">${text}</div>
+        </div>
+    `;
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    return messageDiv;
+}
+
+function updateStreamingMessage(messageDiv, text) {
+    const contentDiv = messageDiv.querySelector('.message-content');
+    renderMarkdownInline(text, contentDiv);
+    document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+}
+
+function addTypingIndicator() {
+    const messagesDiv = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.id = 'typing-indicator';
+    div.className = 'thread-message thread-container mb-4';
+    
+    div.innerHTML = `
+        <div class="thread-line"></div>
+        <div class="message-avatar bg-gradient-to-br from-purple-500 to-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-white shadow-md">
+            L
+        </div>
+        <div class="pl-2">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-sm text-gray-900">LeoAI</span>
+                <span class="text-xs text-gray-400">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                </div>
+                <span class="text-xs text-gray-500">typing...</span>
+            </div>
+        </div>
+    `;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+}
+
+function askPreset(question) {
+    document.getElementById('chatInput').value = question;
+    sendMessage();
+}
+
+async function sendMessage() {
+    if (isProcessing) return;
+    
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message || !currentJob) return;
+    
+    isProcessing = true;
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    input.disabled = true;
+    
+    addMessage(message, true);
+    input.value = '';
+    
+    addTypingIndicator();
+    
+    try {
+        const token = getToken();
+        
+        // Build job context message
+        // Build job context
+        const context = {
+            job_title: currentJob.title,
+            company: currentJob.company,
+            location: currentJob.location,
+            job_type: currentJob.job_type,
+            experience_required: currentJob.experience_required || 'Fresher',
+            skills_required: currentJob.skills_required || 'Not specified',
+            description: currentJob.description
+        };
+                
+        const response = await fetch('/api/v1/career-coach/job-question', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message,
+                context: context
+            })
+        });
+        
+        removeTypingIndicator();
+        
+        if (!response.ok) {
+            addMessage('Sorry, I encountered an error. Please try again.', false);
+            return;
+        }        
+        
+        // Handle simple JSON response
+        const data = await response.json();
+
+        if (data.success) {
+            addMessage(data.response, false);
+        } else {
+            addMessage('Sorry, I could not process your question. Please try again.', false);
+        }
+        
+    } catch (error) {
+        console.error('Chat error:', error);
+        removeTypingIndicator();
+        addMessage('Connection error. Please try again.', false);
+    } finally {
+        isProcessing = false;
+        sendBtn.disabled = false;
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+// ========== JOB ACTIONS ==========
+async function applyToJob() {
+    try {
+        const token = getToken();
+        const response = await fetch(`/api/v1/student/jobs/${jobId}/apply`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Application submitted!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.detail || 'Failed to apply', 'error');
+        }
+    } catch (error) {
+        showNotification('Error applying to job', 'error');
+    }
+}
+
+async function bookmarkJob() {
+    try {
+        const token = getToken();
+        const response = await fetch(`/api/v1/student/jobs/${jobId}/bookmark`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Job bookmarked!', 'success');
+        } else {
+            showNotification(data.detail || 'Failed to bookmark', 'error');
+        }
+    } catch (error) {
+        showNotification('Error bookmarking job', 'error');
+    }
+}
+
+async function removeBookmark() {
+    try {
+        const token = getToken();
+        const response = await fetch(`/api/v1/student/jobs/${jobId}/bookmark`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('Bookmark removed!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to remove bookmark', 'error');
+        }
+    } catch (error) {
+        showNotification('Error removing bookmark', 'error');
+    }
+}
+
+function addToGoogleCalendar(jobInfo) {
+    const deadline = new Date(jobInfo.deadline);
+    
+    const formatDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const eventTitle = `Apply: ${jobInfo.title} at ${jobInfo.company}`;
+    const eventDescription = `Application deadline for ${jobInfo.title} position at ${jobInfo.company}.
+
+Apply here: ${jobInfo.url}
+
+Don't forget to submit your application before the deadline!`;
+    
+    const eventLocation = jobInfo.company;
+    
+    const startDate = new Date(deadline);
+    startDate.setHours(9, 0, 0, 0);
+    const endDate = new Date(deadline);
+    endDate.setHours(17, 0, 0, 0);
+    
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+    googleCalendarUrl.searchParams.append('action', 'TEMPLATE');
+    googleCalendarUrl.searchParams.append('text', eventTitle);
+    googleCalendarUrl.searchParams.append('details', eventDescription);
+    googleCalendarUrl.searchParams.append('location', eventLocation);
+    googleCalendarUrl.searchParams.append('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    
+    window.open(googleCalendarUrl.toString(), '_blank');
+    showNotification('Opening Google Calendar...', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', loadJobDetail);
+</script>
+{% endblock %}

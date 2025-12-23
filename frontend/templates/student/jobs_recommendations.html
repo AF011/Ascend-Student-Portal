@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Jobs - Virtual CDC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filters {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filters label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .filters select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .job-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .match-score {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #f0fdf4;
+            border-radius: 20px;
+            border: 1px solid #86efac;
+        }
+
+        .match-score .percentage {
+            font-weight: 600;
+            color: #16a34a;
+        }
+
+        .match-score .stars {
+            color: #fbbf24;
+            font-size: 14px;
+        }
+
+        .company-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .company-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .job-description {
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .job-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.type {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.source {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f9fafb;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Recommended Jobs For You</h1>
+            <div class="stats">
+                <span>📊 Total Jobs: <strong id="totalJobs">-</strong></span>
+                <span>📄 Page: <strong id="currentPage">-</strong></span>
+                <span>✨ Min Match: <strong id="minScore">60%</strong></span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <label>Min Match Score:</label>
+            <select id="minScoreFilter">
+                <option value="70">70%+</option>
+                <option value="60" selected>60%+</option>
+                <option value="50">50%+</option>
+                <option value="40">40%+</option>
+            </select>
+
+            <label>Jobs Per Page:</label>
+            <select id="limitFilter">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+            </select>
+
+            <button class="btn btn-primary" onclick="loadJobs()">Apply Filters</button>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error" style="display: none;"></div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Loading personalized jobs...</p>
+        </div>
+
+        <!-- Jobs Container -->
+        <div id="jobsContainer"></div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination" style="display: none;">
+            <button onclick="previousPage()" id="prevBtn">← Previous</button>
+            <span class="page-info">
+                Page <strong id="pageNum">1</strong> of <strong id="totalPages">1</strong>
+            </span>
+            <button onclick="nextPage()" id="nextBtn">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalJobs = 0;
+
+        // Get JWT token from localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Load jobs from API
+        async function loadJobs(page = 1) {
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/auth/login';
+                return;
+            }
+
+            const minScore = document.getElementById('minScoreFilter').value;
+            const limit = document.getElementById('limitFilter').value;
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('jobsContainer').innerHTML = '';
+            document.getElementById('pagination').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            try {
+                const response = await fetch(
+                    `/api/v1/jobs/for-me?page=${page}&limit=${limit}&min_score=${minScore}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to load jobs');
+                }
+
+                const data = await response.json();
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+
+                // Update stats
+                currentPage = data.pagination.page;
+                totalPages = data.pagination.total_pages;
+                totalJobs = data.pagination.total_count;
+
+                document.getElementById('totalJobs').textContent = totalJobs;
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('minScore').textContent = minScore + '%';
+
+                // Display jobs
+                if (data.jobs && data.jobs.length > 0) {
+                    displayJobs(data.jobs);
+                    setupPagination(data.pagination);
+                } else {
+                    showNoResults();
+                }
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('loading').style.display = 'none';
+                showError('Failed to load jobs. Please try again.');
+            }
+        }
+
+        // Display jobs
+        function displayJobs(jobs) {
+            const container = document.getElementById('jobsContainer');
+            container.innerHTML = '';
+
+            jobs.forEach(job => {
+                const card = createJobCard(job);
+                container.appendChild(card);
+            });
+        }
+
+        // Create job card
+        function createJobCard(job) {
+            const card = document.createElement('div');
+            card.className = 'job-card';
+
+            const stars = '⭐'.repeat(Math.floor(job.match_score / 20));
+
+            card.innerHTML = `
+                <div class="job-header">
+                    <div>
+                        <div class="job-title">${job.title}</div>
+                        <div class="company-info">
+                            <span>🏢 ${job.company}</span>
+                            <span>📍 ${job.location}</span>
+                        </div>
+                    </div>
+                    <div class="match-score">
+                        <span class="percentage">${job.match_score}%</span>
+                        <span class="stars">${stars}</span>
+                    </div>
+                </div>
+
+                <div class="job-description">
+                    ${job.description}
+                </div>
+
+                <div class="job-meta">
+                    <span class="badge type">${job.job_type.replace('_', ' ')}</span>
+                    <span class="badge source">${job.source === 'ai_scraped' ? 'AI Scraped' : 'CDC Posted'}</span>
+                </div>
+
+                <div class="job-actions">
+                    <button class="btn btn-primary" onclick="applyJob('${job.id}')">
+                        Apply Now
+                    </button>
+                    <button class="btn btn-secondary" onclick="bookmarkJob('${job.id}')">
+                        🔖 Bookmark
+                    </button>
+                    ${job.job_url ? `<button class="btn btn-secondary" onclick="window.open('${job.job_url}', '_blank')">View Original</button>` : ''}
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Setup pagination
+        function setupPagination(pagination) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.style.display = 'flex';
+
+            document.getElementById('pageNum').textContent = pagination.page;
+            document.getElementById('totalPages').textContent = pagination.total_pages;
+
+            document.getElementById('prevBtn').disabled = !pagination.has_prev;
+            document.getElementById('nextBtn').disabled = !pagination.has_next;
+        }
+
+        // Pagination functions
+        function nextPage() {
+            if (currentPage < totalPages) {
+                loadJobs(currentPage + 1);
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                loadJobs(currentPage - 1);
+            }
+        }
+
+        // Show no results
+        function showNoResults() {
+            const container = document.getElementById('jobsContainer');
+            container.innerHTML = `
+                <div class="no-results">
+                    <h2>😔 No Jobs Found</h2>
+                    <p>Try lowering the minimum match score filter</p>
+                </div>
+            `;
+        }
+
+        // Show error
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Apply to job
+        function applyJob(jobId) {
+            alert(`Apply functionality - Job ID: ${jobId}\n\nYour friend can implement the apply logic here!`);
+            // TODO: Implement apply logic
+        }
+
+        // Bookmark job
+        function bookmarkJob(jobId) {
+            alert(`Bookmark functionality - Job ID: ${jobId}\n\nYour friend can implement the bookmark logic here!`);
+            // TODO: Implement bookmark logic
+        }
+
+        // Load jobs on page load
+        window.onload = function() {
+            loadJobs();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+{% extends "base.html" %}
+
+{% block title %}Career Opportunities - Virtual CDC{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Hero Card with AI Message INSIDE -->
+        <div class="bg-white rounded-2xl p-8 mb-6 shadow-sm" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+            <div class="text-white">
+                <h1 class="text-3xl font-bold mb-2" id="greeting-text">Good Morning!</h1>
+                <p class="text-blue-100 text-lg mb-3 italic">"The future belongs to those who believe in the beauty of their dreams."</p>
+                <p class="text-blue-50 text-sm mb-4">You're all set to achieve something great. Keep the spirit and win big! 🚀</p>
+                
+                <!-- AI Message INSIDE Hero -->
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 mt-4 border border-white/30">
+                    <p class="text-white text-sm font-semibold" id="ai-message">🎯 Leo AI is analyzing opportunities for you...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Completion Banner -->
+        <div id="recommendation-banner" class="hidden mb-6">
+            <div class="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-1">Complete Your Profile</h3>
+                        <p class="text-xs text-gray-600 mb-2" id="recommendation-message">Get AI-powered job recommendations</p>
+                        <a href="/student/profile" class="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700">
+                            Complete Now 
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation - Full Width Below Hero -->
+        <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+            <div class="flex border-b border-gray-200">
+                <button onclick="switchTab('for-me')" id="tab-for-me" 
+                    class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold transition-all border-b-2 border-blue-600 text-blue-600 bg-blue-50">
+                    <div class="flex items-center justify-center gap-1 sm:gap-2">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                        <span class="hidden sm:inline">AI for Me</span>
+                        <span class="sm:hidden">AI</span>
+                    </div>
+                </button>
+                
+                <button onclick="switchTab('from-institution')" id="tab-from-institution" 
+                    class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold transition-all border-b-2 border-transparent text-gray-600 hover:bg-gray-50">
+                    <div class="flex items-center justify-center gap-1 sm:gap-2">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        <span class="hidden sm:inline">Campus Placements</span>
+                        <span class="sm:hidden">Campus</span>
+                    </div>
+                </button>
+                
+                <button onclick="switchTab('all-jobs')" id="tab-all-jobs" 
+                    class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold transition-all border-b-2 border-transparent text-gray-600 hover:bg-gray-50">
+                    <div class="flex items-center justify-center gap-1 sm:gap-2">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="hidden sm:inline">All Opportunities</span>
+                        <span class="sm:hidden">All Jobs</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters Section with REAL Dropdowns -->
+        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-end">
+                <!-- Search -->
+                <div class="md:col-span-5">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Search Jobs</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Job title, company, location..." 
+                            class="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                </div>
+
+                <!-- Job Type Dropdown -->
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Job Type</label>
+                    <select id="jobTypeFilter" onchange="applyFilters()" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
+                        <option value="">All Types</option>
+                        <option value="full_time">Full Time</option>
+                        <option value="internship">Internship</option>
+                        <option value="part_time">Part Time</option>
+                        <option value="contract">Contract</option>
+                    </select>
+                </div>
+
+                <!-- AI Match Score Dropdown (only for "For Me" tab) -->
+                <div class="md:col-span-2" id="match-score-filter">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">AI Match</label>
+                    <select id="matchScoreFilter" onchange="applyFilters()" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
+                        <option value="0">All Matches</option>
+                        <option value="90">90%+ Match</option>
+                        <option value="80">80%+ Match</option>
+                        <option value="50">50%+ Match</option>
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <div class="md:col-span-2">
+                    <button onclick="applyFilters()" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Search Jobs</span>
+                        <span class="sm:hidden">Search</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Grid -->
+        <div id="tab-content-for-me" class="tab-content">
+            <div id="loading-for-me" class="flex flex-col items-center justify-center py-16">
+                <div class="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                <p class="mt-4 text-sm text-gray-600 font-medium">Finding best matches...</p>
+            </div>
+            <div id="jobs-for-me" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6"></div>
+            <div id="pagination-for-me" class="hidden mb-6"></div>
+            <div id="no-jobs-for-me" class="hidden bg-white rounded-xl p-12 shadow-sm text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-900 font-semibold mb-1">No matches found</p>
+                <p class="text-xs text-gray-500">Try adjusting your filters</p>
+            </div>
+        </div>
+
+        <div id="tab-content-from-institution" class="tab-content hidden">
+            <div id="loading-from-institution" class="flex flex-col items-center justify-center py-16">
+                <div class="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                <p class="mt-4 text-sm text-gray-600 font-medium">Loading placements...</p>
+            </div>
+            <div id="jobs-from-institution" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6"></div>
+            <div id="pagination-from-institution" class="hidden mb-6"></div>
+            <div id="no-jobs-from-institution" class="hidden bg-white rounded-xl p-12 shadow-sm text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-900 font-semibold mb-1">No placements yet</p>
+                <p class="text-xs text-gray-500">Check back soon</p>
+            </div>
+        </div>
+
+        <div id="tab-content-all-jobs" class="tab-content hidden">
+            <div id="loading-all-jobs" class="flex flex-col items-center justify-center py-16">
+                <div class="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                <p class="mt-4 text-sm text-gray-600 font-medium">Loading opportunities...</p>
+            </div>
+            <div id="jobs-all-jobs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6"></div>
+            <div id="pagination-all-jobs" class="hidden mb-6"></div>
+            <div id="no-jobs-all-jobs" class="hidden bg-white rounded-xl p-12 shadow-sm text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-900 font-semibold mb-1">No jobs available</p>
+                <p class="text-xs text-gray-500">Try adjusting your filters</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="{{ url_for('static', path='/js/utils.js') }}"></script>
+
+<script>
+let currentTab = 'for-me';
+let currentPage = 1, currentPageInstitution = 1, currentPageAllJobs = 1;
+let totalPages = 1, totalPagesInstitution = 1, totalPagesAllJobs = 1;
+let currentMatchScore = 0, currentJobType = '';
+
+// Set greeting based on time
+function setGreeting() {
+    const hour = new Date().getHours();
+    let greeting = 'Good Evening';
+    if (hour >= 0 && hour < 5) greeting = 'Hey Midnight Owl';
+    else if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+    else if (hour >= 12 && hour < 18) greeting = 'Good Afternoon';
+    
+    document.getElementById('greeting-text').textContent = `${greeting}!`;
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+    
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+        btn.classList.add('border-transparent', 'text-gray-600');
+    });
+    const activeTab = document.getElementById(`tab-${tab}`);
+    activeTab.classList.remove('border-transparent', 'text-gray-600');
+    activeTab.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+    
+    // Show/hide AI match filter
+    document.getElementById('match-score-filter').style.display = tab === 'for-me' ? 'block' : 'none';
+    
+    if (tab === 'for-me') loadForMeJobs();
+    else if (tab === 'from-institution') loadInstitutionJobs();
+    else loadAllJobs();
+}
+
+async function loadForMeJobs() {
+    try {
+        const token = getToken();
+        const search = document.getElementById('searchInput').value;
+        const jobType = document.getElementById('jobTypeFilter').value;
+        const matchScore = document.getElementById('matchScoreFilter').value;
+        
+        document.getElementById('loading-for-me').classList.remove('hidden');
+        document.getElementById('jobs-for-me').innerHTML = '';
+        document.getElementById('no-jobs-for-me').classList.add('hidden');
+        document.getElementById('pagination-for-me').classList.add('hidden');
+        
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: 12,
+            min_score: matchScore,
+            ...(jobType && { job_type: jobType }),
+            ...(search && { search })
+        });
+        
+        const res = await fetch(`/api/v1/student/jobs/for-me?${params}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        
+        document.getElementById('loading-for-me').classList.add('hidden');
+        
+        if (data.jobs?.length > 0) {
+            const container = document.getElementById('jobs-for-me');
+            data.jobs.forEach(job => container.appendChild(createJobCard(job, true)));
+            
+            // Calculate total pages
+            totalPages = data.total_pages || Math.ceil(data.total_jobs / 12);
+            const currentPageNum = data.current_page || currentPage;
+            const totalJobs = data.total_jobs || data.jobs.length;
+            
+            updatePagination('for-me', currentPageNum, totalPages, totalJobs);
+            
+            document.getElementById('ai-message').textContent = `🎯 Leo AI found ${totalJobs} jobs matching your profile!`;
+        } else {
+            document.getElementById('no-jobs-for-me').classList.remove('hidden');
+            document.getElementById('ai-message').textContent = '🔍 Leo AI is searching for opportunities that match your skills...';
+        }
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading-for-me').classList.add('hidden');
+        document.getElementById('no-jobs-for-me').classList.remove('hidden');
+    }
+}
+
+async function loadInstitutionJobs() {
+    try {
+        const token = getToken();
+        const search = document.getElementById('searchInput').value;
+        const jobType = document.getElementById('jobTypeFilter').value;
+        
+        document.getElementById('loading-from-institution').classList.remove('hidden');
+        document.getElementById('jobs-from-institution').innerHTML = '';
+        document.getElementById('no-jobs-from-institution').classList.add('hidden');
+        document.getElementById('pagination-from-institution').classList.add('hidden');
+        
+        const skip = (currentPageInstitution - 1) * 12;
+        const params = new URLSearchParams({
+            skip: skip,
+            limit: 12,
+            ...(jobType && { job_type: jobType }),
+            ...(search && { search })
+        });
+        
+        const res = await fetch(`/api/v1/jobs?${params}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        
+        document.getElementById('loading-from-institution').classList.add('hidden');
+        
+        // Filter by source: "CLG-P" on frontend
+        const campusJobs = data.jobs.filter(job => job.source === 'CLG-P');
+        
+        if (campusJobs.length > 0) {
+            const container = document.getElementById('jobs-from-institution');
+            campusJobs.forEach(job => container.appendChild(createJobCard(job, false)));
+            
+            // Calculate pagination for filtered results
+            const totalPages = Math.ceil(data.total / 12);
+            totalPagesInstitution = totalPages;
+            updatePagination('from-institution', currentPageInstitution, totalPages, campusJobs.length);
+            
+            document.getElementById('ai-message').textContent = `🏢 Your placement team posted ${campusJobs.length} new opportunities for you!`;
+        } else {
+            document.getElementById('no-jobs-from-institution').classList.remove('hidden');
+            document.getElementById('ai-message').textContent = '🏢 Your placement team will post opportunities soon. Stay tuned!';
+        }
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading-from-institution').classList.add('hidden');
+        document.getElementById('no-jobs-from-institution').classList.remove('hidden');
+    }
+}
+
+async function loadAllJobs() {
+    try {
+        const token = getToken();
+        const search = document.getElementById('searchInput').value;
+        const jobType = document.getElementById('jobTypeFilter').value;
+        
+        document.getElementById('loading-all-jobs').classList.remove('hidden');
+        document.getElementById('jobs-all-jobs').innerHTML = '';
+        document.getElementById('no-jobs-all-jobs').classList.add('hidden');
+        document.getElementById('pagination-all-jobs').classList.add('hidden');
+        
+        const skip = (currentPageAllJobs - 1) * 12;
+        const params = new URLSearchParams({
+            skip: skip,
+            limit: 12,
+            ...(jobType && { job_type: jobType }),
+            ...(search && { search })
+        });
+        
+        const res = await fetch(`/api/v1/jobs?${params}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        
+        document.getElementById('loading-all-jobs').classList.add('hidden');
+        
+        if (data.jobs?.length > 0) {
+            const container = document.getElementById('jobs-all-jobs');
+            data.jobs.forEach(job => container.appendChild(createJobCard(job, false)));
+            
+            const totalPages = Math.ceil(data.total / 12);
+            totalPagesAllJobs = totalPages;
+            updatePagination('all-jobs', currentPageAllJobs, totalPages, data.total);
+            
+            document.getElementById('ai-message').textContent = `💼 ${data.total} opportunities waiting for talented people like you!`;
+        } else {
+            document.getElementById('no-jobs-all-jobs').classList.remove('hidden');
+            document.getElementById('ai-message').textContent = '🔍 Exploring all available opportunities for you...';
+        }
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading-all-jobs').classList.add('hidden');
+        document.getElementById('no-jobs-all-jobs').classList.remove('hidden');
+    }
+}
+
+function createJobCard(job, showMatch) {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer';
+    
+    let matchBadge = '';
+    if (showMatch && job.match_score) {
+        const score = Math.round(job.match_score);
+        let color = 'bg-gray-100 text-gray-700';
+        
+        if (score >= 90) color = 'bg-gradient-to-r from-green-400 to-emerald-500 text-white';
+        else if (score >= 80) color = 'bg-gradient-to-r from-blue-400 to-cyan-500 text-white';
+        else if (score >= 70) color = 'bg-gradient-to-r from-purple-400 to-pink-500 text-white';
+        
+        matchBadge = `<div class="flex items-center justify-between mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 ${color} rounded-lg text-xs font-bold">${score}% Match</span>
+        </div>`;
+    }
+    
+    const typeMap = {
+        'full_time': { label: 'Full Time', color: 'bg-blue-100 text-blue-700' },
+        'internship': { label: 'Internship', color: 'bg-green-100 text-green-700' },
+        'part_time': { label: 'Part Time', color: 'bg-purple-100 text-purple-700' },
+        'contract': { label: 'Contract', color: 'bg-orange-100 text-orange-700' }
+    };
+    const typeInfo = typeMap[job.job_type] || { label: job.job_type, color: 'bg-gray-100 text-gray-700' };
+    
+    card.onclick = () => {
+        if (job._id || job.id) window.location.href = `/student/jobs/${job._id || job.id}`;
+    };
+    
+    card.innerHTML = `
+        ${matchBadge}
+        <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2">${job.title}</h3>
+        <div class="flex items-center gap-2 text-sm text-gray-600 mb-1.5">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            <span class="truncate font-medium">${job.company}</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="truncate">${job.location}</span>
+        </div>
+        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+            <span class="px-2.5 py-1 ${typeInfo.color} rounded-lg text-xs font-bold">${typeInfo.label}</span>
+            <span class="text-xs text-gray-500">${job.applications_count || 0} applied</span>
+        </div>
+    `;
+    
+    return card;
+}
+
+function updatePagination(tab, current, total, totalJobs) {
+    const container = document.getElementById(`pagination-${tab}`);
+    
+    if (total > 0) {
+        container.classList.remove('hidden');
+        
+        const prevDisabled = current === 1;
+        const nextDisabled = current === total || total === 0;
+        
+        // Generate page numbers (show max 5 pages on desktop, 3 on mobile)
+        let pageNumbers = '';
+        const maxPagesToShow = window.innerWidth < 640 ? 3 : 5;
+        let startPage = Math.max(1, current - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(total, startPage + maxPagesToShow - 1);
+        
+        // Adjust start if we're near the end
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        
+        // First page
+        if (startPage > 1) {
+            pageNumbers += `
+                <button onclick="goToPage${tab === 'from-institution' ? 'Institution' : tab === 'all-jobs' ? 'AllJobs' : ''}(1)" 
+                    class="hidden sm:inline-block px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
+                    1
+                </button>
+            `;
+            if (startPage > 2) {
+                pageNumbers += '<span class="hidden sm:inline-block px-2 text-gray-400">...</span>';
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === current) {
+                pageNumbers += `
+                    <button class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-white bg-blue-600 border border-blue-600 rounded-lg">
+                        ${i}
+                    </button>
+                `;
+            } else {
+                pageNumbers += `
+                    <button onclick="goToPage${tab === 'from-institution' ? 'Institution' : tab === 'all-jobs' ? 'AllJobs' : ''}(${i})" 
+                        class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
+                        ${i}
+                    </button>
+                `;
+            }
+        }
+        
+        // Last page
+        if (endPage < total) {
+            if (endPage < total - 1) {
+                pageNumbers += '<span class="hidden sm:inline-block px-2 text-gray-400">...</span>';
+            }
+            pageNumbers += `
+                <button onclick="goToPage${tab === 'from-institution' ? 'Institution' : tab === 'all-jobs' ? 'AllJobs' : ''}(${total})" 
+                    class="hidden sm:inline-block px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
+                    ${total}
+                </button>
+            `;
+        }
+        
+        container.innerHTML = `
+            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3 text-xs sm:text-sm">
+                    <span class="text-gray-600">Showing <span class="font-semibold">${totalJobs}</span> jobs</span>
+                    <span class="text-gray-500">Page ${current}/${total}</span>
+                </div>
+                <div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+                    <button onclick="changePage${tab === 'from-institution' ? 'Institution' : tab === 'all-jobs' ? 'AllJobs' : ''}(-1)" 
+                        ${prevDisabled ? 'disabled' : ''}
+                        class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        <span class="hidden sm:inline">← Prev</span>
+                        <span class="sm:hidden">←</span>
+                    </button>
+                    
+                    ${pageNumbers}
+                    
+                    <button onclick="changePage${tab === 'from-institution' ? 'Institution' : tab === 'all-jobs' ? 'AllJobs' : ''}(1)" 
+                        ${nextDisabled ? 'disabled' : ''}
+                        class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        <span class="hidden sm:inline">Next →</span>
+                        <span class="sm:hidden">→</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+function changePage(dir) {
+    currentPage += dir;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    loadForMeJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadForMeJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changePageInstitution(dir) {
+    currentPageInstitution += dir;
+    if (currentPageInstitution < 1) currentPageInstitution = 1;
+    if (currentPageInstitution > totalPagesInstitution) currentPageInstitution = totalPagesInstitution;
+    loadInstitutionJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToPageInstitution(page) {
+    currentPageInstitution = page;
+    loadInstitutionJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changePageAllJobs(dir) {
+    currentPageAllJobs += dir;
+    if (currentPageAllJobs < 1) currentPageAllJobs = 1;
+    if (currentPageAllJobs > totalPagesAllJobs) currentPageAllJobs = totalPagesAllJobs;
+    loadAllJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToPageAllJobs(page) {
+    currentPageAllJobs = page;
+    loadAllJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function applyFilters() {
+    currentPage = 1;
+    currentPageInstitution = 1;
+    currentPageAllJobs = 1;
+    
+    if (currentTab === 'for-me') loadForMeJobs();
+    else if (currentTab === 'from-institution') loadInstitutionJobs();
+    else loadAllJobs();
+}
+
+async function checkRecommendationStatus() {
+    try {
+        const token = getToken();
+        const res = await fetch('/api/v1/student/jobs/recommendation-status', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (!data.can_get_recommendations) {
+            document.getElementById('recommendation-banner').classList.remove('hidden');
+            document.getElementById('recommendation-message').textContent = data.message;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = getToken();
+    if (!token) {
+        window.location.href = '/auth/login';
+        return;
+    }
+    
+    setGreeting();
+    await checkRecommendationStatus();
+    switchTab('for-me');
+});
+
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') applyFilters();
+});
+</script>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.border-3 {
+    border-width: 3px;
+}
+</style>
+
+{% endblock %}
