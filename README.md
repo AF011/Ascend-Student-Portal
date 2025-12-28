@@ -47,6 +47,3 @@ A Virtual CDC for underprivileged colleges across India. We're building the infr
 
 ---
 
-**Copy this, replace `YOUR_USERNAME` and email, and you're good to go!** 🎯
-
-Need any changes? Want to add/remove sections?
