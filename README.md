@@ -20,8 +20,6 @@ Ascend is an intelligent job discovery platform that aggregates opportunities fr
 
 A Virtual CDC for underprivileged colleges across India. We're building the infrastructure to scale career development resources to institutions that need it most.
 
-**Current Deployment:** P.B. Siddhartha College of Arts & Science
-
 **Future:** Multi-college platform with LLM-powered guidance, advanced training modules, and comprehensive career support.
 
 ---
